@@ -1,0 +1,29 @@
+from django.shortcuts import render
+from django.db import connection, ProgrammingError
+
+from estate.forms import EstateSearchForm
+
+
+# View method for real estate search
+def index(request):
+    estate_search_result = None
+    # Checking request type
+    if request.method == 'POST':
+        # Initialising form using POST request
+        form = EstateSearchForm(request.POST)
+        # Validating form
+        if form.is_valid():
+            cursor = connection.cursor()
+            try:
+                cursor.execute(
+                    'SELECT name, area FROM estate_property WHERE city ="' + form.cleaned_data['property_search'] + '" LIMIT 10')
+                estate_search_result = cursor.fetchall()
+            except ProgrammingError:
+                estate_search_result = None
+            finally:
+                cursor.close()
+    else:
+        # Initialising empty form
+        form = EstateSearchForm()
+
+    return render(request, 'estate/index.html', {'form': form, 'estate_search_result': estate_search_result})
