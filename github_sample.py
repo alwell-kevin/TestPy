@@ -1,31 +1,25 @@
-from django.conf.urls import url
-from django.db import connection
+from flask import Flask, request, render_template, make_response
+from lxml import etree
 
+app = Flask(__name__)
 
-def show_user(request, username):
-    with connection.cursor() as cursor:
-    # BAD -- Using string formatting
-        cursor.execute("SELECT * FROM users WHERE username = '%s'" % username)
-        user = cursor.fetchone()
+@app.route('/', methods=['GET'])
+def index():
+  return render_template('index.html')
 
-        # GOOD -- Using parameters
-        cursor.execute("SELECT * FROM users WHERE username = %s", username)
-        user = cursor.fetchone()
+@app.route('/', methods=['POST'])
+def parse_xml():
+  parsed_xml = None
+  xml = request.form['xml']
+  parser = etree.XMLParser()
+  try:
+    doc = etree.fromstring(xml, parser)
+    parsed_xml = etree.tostring(doc)
+    return render_template('parsed.html', parsed=parsed_xml.decode())
+  except Exception as e:
+    print(e)
+    pass
+  return render_template('index.html', error="Please enter valid XML content")
 
-        # BAD -- Manually quoting placeholder (%s)
-        cursor.execute("SELECT * FROM users WHERE username = '%s'", username)
-        user = cursor.fetchone()
-        
-        cursor.execute("SELECT admin FROM users WHERE username = '" + username + '");
-        user = cursor.fetchone()
-
-        cursor.execute("SELECT admin FROM users WHERE username = '%s' % username);
-        user = cursor.fetchone()
-
-        cursor.execute("SELECT admin FROM users WHERE username = '{}'".format(username));
-        user = cursor.fetchone()
-
-        #cursor.execute(f"SELECT admin FROM users WHERE username = '{username}'");
-        #user = cursor.fetchone()
-
-urlpatterns = [url(r'^users/(?P<username>[^/]+)$', show_user)]
+if __name__ == '__main__':
+  app.run(host='0.0.0.0', debug=True)
