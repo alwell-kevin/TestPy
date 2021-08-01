@@ -1,3 +1,9 @@
+def login():
+    username = request.form['username']
+    print(username)
+    password = request.form['password']
+    print(password)
+
 def is_admin(username: str) -> bool:
     with connection.cursor() as cursor:
         cursor.execute(""" SELECT admin FROM users WHERE username = '%s' """ % username)
