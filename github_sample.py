@@ -20,6 +20,3 @@ def parse_xml():
     print(e)
     pass
   return render_template('index.html', error="Please enter valid XML content")
-
-if __name__ == '__main__':
-  app.run(host='0.0.0.0', debug=True)
