@@ -47,7 +47,7 @@ def list_users():
     if rank == 'admin':
         return "Can't list admins!"
     c = CONNECTION.cursor()
-    c.execute("SELECT username, rank FROM users WHERE rank = '{0}'".format(rank))
+    c.execute("SELECT username, rank FROM users WHERE rank = '%s'" % rank)
     data = c.fetchall()
     return str(data)
 
